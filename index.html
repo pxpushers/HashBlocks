@@ -3,64 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="output.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://threejs.org/build/three.js"></script>
     <style>
         body {
             background-color: black;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: monospace;
             color: #FFA500;  /* Vibrant orange color */
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             overflow: hidden;
         }
-        .main-content {
-            background-color: black;
-            color: #FFA500;  /* Vibrant orange color */
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .text-content {
             text-align: center;
-            height: 70vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            margin-bottom: 1rem;
         }
-        @media (max-width: 640px) { /* Tailwind's SM breakpoint */
-            .main-content {
+        .text-content h1 {
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        #rendererContainer {
+            width: 100%;
+            height: 70vh;
+        }
+        @media (max-width: 640px) {
+            #rendererContainer {
                 width: 90vw;
                 height: auto;
             }
         }
     </style>
-    <title>ProofOfDev Log</title>
+    <title>HashBlocks</title>
 </head>
 <body>
-    <div class="main-content">
-        <h1 class="text-2xl font-bold mb-4">ProofOfDev Log</h1>
+    <div class="text-content">
+        <h1>HashBlocks</h1>
+        <p id="blockHeightText">Fetching block height...</p>
+        <p id="blockTimestampText">Fetching block timestamp...</p>
         <p id="blockHashText">Fetching latest block hash...</p>
     </div>
+    <div id="rendererContainer"></div>
     <script type="text/javascript">
+        let scene;
+
         async function fetchLatestBlockHash() {
-            try {
-                const response = await axios.get('https://api.blockchair.com/bitcoin/blocks?limit=1');
-                if (response.data && response.data.data && response.data.data.length > 0) {
-                    const latestBlock = response.data.data[0];
-                    const latestBlockHash = latestBlock.hash;
-                    document.getElementById('blockHashText').innerText = `Latest Block Hash: ${latestBlockHash}`;
-                } else {
-                    document.getElementById('blockHashText').innerText = 'Failed to fetch latest block data';
-                }
-            } catch (error) {
-                document.getElementById('blockHashText').innerText = 'Error fetching latest block hash';
+    try {
+        const response = await axios.get('https://api.blockchair.com/bitcoin/blocks?limit=1');
+        if (response.data && response.data.data && response.data.data.length > 0) {
+            const latestBlock = response.data.data[0];
+            const latestBlockHash = latestBlock.hash.replace(/^0+/, '');  // Remove leading zeros
+            const blockHeight = latestBlock.id;  // Block height
+            const blockTimestamp = latestBlock.time;  // Block timestamp
+            document.getElementById('blockHashText').innerText = `Latest Block Hash: ${latestBlockHash}`;
+            document.getElementById('blockHeightText').innerText = `Block Height: ${blockHeight}`;
+            document.getElementById('blockTimestampText').innerText = `Block Timestamp: ${blockTimestamp}`;
+            generateVisualization(latestBlockHash);
+        } else {
+            document.getElementById('blockHashText').innerText = 'Failed to fetch latest block data';
+            document.getElementById('blockHeightText').innerText = 'Failed to fetch block height';
+            document.getElementById('blockTimestampText').innerText = 'Failed to fetch block timestamp';
+        }
+    } catch (error) {
+        document.getElementById('blockHashText').innerText = 'Error fetching latest block hash';
+        document.getElementById('blockHeightText').innerText = 'Error fetching block height';
+        document.getElementById('blockTimestampText').innerText = 'Error fetching block timestamp';
+    }
+}
+
+// Call the function to fetch the latest block hash
+fetchLatestBlockHash();
+
+
+
+if (response.data && response.data.data && response.data.data.length > 0) {
+    const latestBlock = response.data.data[0];
+    const latestBlockHash = latestBlock.hash.replace(/^0+/, '');  // Remove leading zeros
+    const blockHeight = latestBlock.id;  // Block height
+    const blockTimestamp = latestBlock.time;  // Block timestamp
+    document.getElementById('blockHashText').innerText = `Latest Block Hash: ${latestBlockHash}`;
+    document.getElementById('blockHeightText').innerText = `Block Height: ${blockHeight}`;
+    document.getElementById('blockTimestampText').innerText = `Block Timestamp: ${blockTimestamp}`;
+    generateVisualization(latestBlockHash);  // Ensure this line is present and correctly written
+}
+
+
+
+        // Visualization code
+        function generateVisualization(hash) {
+            scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+            const container = document.getElementById('rendererContainer');
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            container.appendChild(renderer.domElement);
+
+            const geometry = new THREE.BoxGeometry(10, 10, 10);
+
+            // Create a group to hold all the voxels
+            const group = new THREE.Group();
+
+            for (let i = 0; i < hash.length; i += 3) {
+                const hexColor = `#${hash.substring(i, i + 3)}`;
+                const material = new THREE.MeshBasicMaterial({color: hexColor});
+                const voxel = new THREE.Mesh(geometry, material);
+
+                voxel.position.set(
+                    map(parseInt(hash.substring(i, i + 1), 16), 0, 15, -20, 20),
+                    map(parseInt(hash.substring(i + 1, i + 2), 16), 0, 15, -20, 20),
+                    map(parseInt(hash.substring(i + 2, i + 3), 16), 0, 15, -20, 20)
+                );
+
+                // Add each voxel to the group
+                group.add(voxel);
             }
+
+            // Add the group to the scene
+            scene.add(group);
+
+            camera.position.z = 60;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            }
+
+            animate();
         }
 
-        // Call the function to fetch the latest block hash
-        fetchLatestBlockHash();
+        function map(value, in_min, in_max, out_min, out_max) {
+            return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+        }
     </script>
 </body>
 </html>
