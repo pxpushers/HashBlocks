@@ -3,11 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProofOfDev</title>
     <link rel="stylesheet" href="output.css">
+    <style>
+        @media (max-width: 640px) { /* Tailwind's SM breakpoint */
+            .main-content {
+                width: 90vw !important;
+                height: auto !important;
+            }
+        }
+    </style>
+    <title>ProofOfDev</title>
 </head>
-<body>
-    <h1>ProofOfDev</h1>
-    <p>This page will log the progress of the ProofOfDev project.</p>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen overflow-hidden">
+    <div class="main-content bg-white p-8 rounded-lg shadow-lg text-center w-auto h-[70vh]">
+        <h1 class="text-2xl font-bold mb-4">ProofOfDev Log</h1>
+        <p>This page will log the progress of the ProofOfDev project.</p>
+    </div>
 </body>
 </html>
