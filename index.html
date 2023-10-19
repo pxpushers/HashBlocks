@@ -31,6 +31,7 @@
             background-color: rgba(0, 0, 0, 0.5); /* 50% transparent black background */
             color: #FFA500;
             padding: 10px;
+            padding-bottom: 2px;
             width: 100vw;
             text-align: left;
             font-size: 0.75rem;
@@ -107,7 +108,7 @@
         fetchLatestBlockHash();
 
        // Visualization code
-       function generateVisualization(hash) {
+       function generateVisualization(hash, blockHeight) {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -129,6 +130,9 @@
             map(parseInt(hash.substring(i + 1, i + 2), 16), 0, 15, -15, 15),  // Adjusted mapping range
             map(parseInt(hash.substring(i + 2, i + 3), 16), 0, 15, -15, 15)   // Adjusted mapping range
         );
+
+        const scaleValue = map(parseInt(hash.substring(i, i + 1), 16), 0, 15, 0.3, 1.8);
+        voxel.scale.set(scaleValue, scaleValue, scaleValue);
 
         // Add each voxel to the group
         group.add(voxel);
