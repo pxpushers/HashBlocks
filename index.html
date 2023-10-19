@@ -92,7 +92,7 @@
                     document.getElementById('blockHashText').innerText = `Latest Block Hash: ${latestBlockHash}`;
                     document.getElementById('blockHeightText').innerText = `Block Height: ${blockHeight}`;
                     document.getElementById('blockTimestampText').innerText = `Block Timestamp: ${blockTimestamp}`;
-                    generateVisualization(latestBlockHash);
+                    generateVisualization(latestBlockHash, latestBlock.id, latestBlock.time);
                 } else {
                     document.getElementById('blockHashText').innerText = 'Failed to fetch latest block data';
                     document.getElementById('blockHeightText').innerText = 'Failed to fetch block height';
@@ -108,21 +108,45 @@
         fetchLatestBlockHash();
 
        // Visualization code
-       function generateVisualization(hash, blockHeight) {
+       function generateVisualization(hash, blockHeight, blockTimestamp) {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer({ alpha: true });
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(0, 1, 1).normalize();
+    scene.add(light);
     container = document.getElementById('rendererContainer');
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(container.offsetWidth, container.offsetHeight);
     container.appendChild(renderer.domElement);
+    const timeNumbers = blockTimestamp.replace(/\D/g, '');
+    const timeValue = parseInt(timeNumbers, 10);
     const geometry = new THREE.BoxGeometry(10, 10, 10);
 
     // Create a group to hold all the voxels
     group = new THREE.Group();  // Removed 'const' keyword to use global 'group' variable
     for (let i = 0; i < hash.length; i += 3) {
-        const hexColor = `#${hash.substring(i, i + 3)}`;
-        const material = new THREE.MeshBasicMaterial({color: hexColor});
+        // Parse the three characters from the hash as hexadecimal to get RGB values
+        const rValue = parseInt(hash.charAt(i), 16);
+        const gValue = parseInt(hash.charAt(i + 1), 16);
+        const bValue = parseInt(hash.charAt(i + 2), 16);
+
+        // Modify the RGB values based on the block height
+        const modifiedRValue = (rValue + blockHeight) % 16;
+        const modifiedGValue = (gValue + blockHeight) % 16;
+        const modifiedBValue = (bValue + blockHeight) % 16;
+
+        // Ensure a minimum brightness by setting a lower limit on each color channel
+        const minBrightness = 6;  // Set a value between 0 and 15
+        const finalRValue = Math.max(modifiedRValue, minBrightness).toString(16);
+        const finalGValue = Math.max(modifiedGValue, minBrightness).toString(16);
+        const finalBValue = Math.max(modifiedBValue, minBrightness).toString(16);
+
+        // Combine the final RGB values to get the color
+        const hexColor = `#${finalRValue}${finalGValue}${finalBValue}`;
+        const metalness = (timeValue + i) % 10 / 10;
+        const roughness = (timeValue - i) % 10 / 10;
+        const material = new THREE.MeshStandardMaterial({color: hexColor, metalness: metalness, roughness: roughness});
         const voxel = new THREE.Mesh(geometry, material);
 
         voxel.position.set(
