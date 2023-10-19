@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="output.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         body {
+            background-color: black;
+            font-family: 'Courier New', Courier, monospace;
+            color: #FFA500;  /* Vibrant orange color */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -14,12 +18,16 @@
         }
         .main-content {
             background-color: black;
-            color: white;
+            color: #FFA500;  /* Vibrant orange color */
             padding: 2rem;
             border-radius: 1rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             text-align: center;
             height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         @media (max-width: 640px) { /* Tailwind's SM breakpoint */
             .main-content {
@@ -33,7 +41,26 @@
 <body>
     <div class="main-content">
         <h1 class="text-2xl font-bold mb-4">ProofOfDev Log</h1>
-        <p>This page will log the progress of the ProofOfDev project.</p>
+        <p id="blockHashText">Fetching latest block hash...</p>
     </div>
+    <script type="text/javascript">
+        async function fetchLatestBlockHash() {
+            try {
+                const response = await axios.get('https://api.blockchair.com/bitcoin/blocks?limit=1');
+                if (response.data && response.data.data && response.data.data.length > 0) {
+                    const latestBlock = response.data.data[0];
+                    const latestBlockHash = latestBlock.hash;
+                    document.getElementById('blockHashText').innerText = `Latest Block Hash: ${latestBlockHash}`;
+                } else {
+                    document.getElementById('blockHashText').innerText = 'Failed to fetch latest block data';
+                }
+            } catch (error) {
+                document.getElementById('blockHashText').innerText = 'Error fetching latest block hash';
+            }
+        }
+
+        // Call the function to fetch the latest block hash
+        fetchLatestBlockHash();
+    </script>
 </body>
 </html>
