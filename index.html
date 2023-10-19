@@ -70,6 +70,7 @@
         let camera;
         let renderer;
         let container;
+        let group;
 
         function onWindowResize() {
         camera.aspect = container.offsetWidth / container.offsetHeight;
@@ -106,7 +107,7 @@
         fetchLatestBlockHash();
 
        // Visualization code
-function generateVisualization(hash) {
+       function generateVisualization(hash) {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -117,7 +118,7 @@ function generateVisualization(hash) {
     const geometry = new THREE.BoxGeometry(10, 10, 10);
 
     // Create a group to hold all the voxels
-    const group = new THREE.Group();
+    group = new THREE.Group();  // Removed 'const' keyword to use global 'group' variable
     for (let i = 0; i < hash.length; i += 3) {
         const hexColor = `#${hash.substring(i, i + 3)}`;
         const material = new THREE.MeshBasicMaterial({color: hexColor});
@@ -138,8 +139,16 @@ function generateVisualization(hash) {
     camera.position.set(0, 0, 60);  // Adjusted camera position
     function animate() {
         requestAnimationFrame(animate);
+
+        // Rotation animation
+        group.children.forEach(voxel => {
+            voxel.rotation.x += 0.01;
+            voxel.rotation.y += 0.01;
+        });
+
         renderer.render(scene, camera);
     }
+
     animate();
 }
 
