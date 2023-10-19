@@ -64,7 +64,7 @@
     <div id="infoBox">
         <p id="blockHeightText">Fetching block height...</p>
         <p id="blockTimestampText">Fetching block timestamp...</p>
-        <p id="blockHashText">Fetching latest block hash...</p>
+        <p id="blockHashText">Fetching block hash...</p>
     </div>
     <img src="pxpw.svg" alt="Logo" id="logo">
     <script type="text/javascript">
@@ -90,7 +90,7 @@
                     const latestBlockHash = latestBlock.hash.replace(/^0+/, '');  // Remove leading zeros
                     const blockHeight = latestBlock.id;  // Block height
                     const blockTimestamp = latestBlock.time;  // Block timestamp
-                    document.getElementById('blockHashText').innerText = `Latest Block Hash: ${latestBlockHash}`;
+                    document.getElementById('blockHashText').innerText = `Block Hash: ${latestBlockHash}`;
                     document.getElementById('blockHeightText').innerText = `Block Height: ${blockHeight}`;
                     document.getElementById('blockTimestampText').innerText = `Block Timestamp: ${blockTimestamp}`;
                     generateVisualization(latestBlockHash, latestBlock.id, latestBlock.time);
