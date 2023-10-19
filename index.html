@@ -22,8 +22,7 @@
             transform: translateX(-50%);
         }
         .text-content h1 {
-            font-size: 0.75rem;
-            font-weight: bold;
+            font-size: 1rem;
         }
         #infoBox {
             position: fixed;
@@ -32,16 +31,11 @@
             background-color: rgba(0, 0, 0, 0.5); /* 50% transparent black background */
             color: #FFA500;
             padding: 10px;
-            max-width: 35vw;
+            width: 100vw;
             text-align: left;
             font-size: 0.75rem;
             border-radius: 20px;
         }
-        #blockHashText {
-        max-width: 100%;  /* Set maximum width */
-        word-break: break-all;  /* This will break words at any character if necessary */
-        white-space: normal;  /* This allows the text to wrap to the next line */
-    }
         #rendererContainer {
             position: absolute;
             top: 0;
@@ -51,9 +45,8 @@
         }
         img#logo {
             position: absolute;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 12px;
+            left: 12px;
             height: auto;
             margin-bottom: 5px;
             width: 78px;
