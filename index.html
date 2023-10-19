@@ -5,17 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="output.css">
     <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        .main-content {
+            background-color: black;
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            height: 70vh;
+        }
         @media (max-width: 640px) { /* Tailwind's SM breakpoint */
             .main-content {
-                width: 90vw !important;
-                height: auto !important;
+                width: 90vw;
+                height: auto;
             }
         }
     </style>
-    <title>ProofOfDev</title>
+    <title>ProofOfDev Log</title>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen overflow-hidden">
-    <div class="main-content bg-white p-8 rounded-lg shadow-lg text-center w-auto h-[70vh]">
+<body>
+    <div class="main-content">
         <h1 class="text-2xl font-bold mb-4">ProofOfDev Log</h1>
         <p>This page will log the progress of the ProofOfDev project.</p>
     </div>
