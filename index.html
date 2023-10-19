@@ -17,9 +17,18 @@
             min-height: 100vh;
             overflow: hidden;
         }
+        img#logo {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            height: auto;
+            margin-bottom: 5px;
+            width: 78px;
+        }
         .text-content {
             text-align: center;
-            margin-top: 24px; /* 24px top margin */
+            margin-top: 12px; /* 24px top margin */
             position: absolute; /* Absolute positioning */
             top: 0;
             left: 50%;
@@ -44,7 +53,7 @@
     }
         }
     </style>
-    <title>HashBlocks</title>
+    <title>HashBlocks by PxPushers</title>
 </head>
 <body>
     <div class="text-content">
@@ -54,6 +63,7 @@
         <p id="blockHashText">Fetching latest block hash...</p>
     </div>
     <div id="rendererContainer"></div>
+    <img src="pxpw.svg" alt="Logo" id="logo">
     <script type="text/javascript">
          let scene;
         let camera;
@@ -106,7 +116,7 @@ fetchLatestBlockHash();
     renderer = new THREE.WebGLRenderer();
     container = document.getElementById('rendererContainer');
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);  // Change this line
+    renderer.setSize(container.offsetWidth, container.offsetHeight);
     container.appendChild(renderer.domElement);
 
     const geometry = new THREE.BoxGeometry(10, 10, 10);
@@ -120,9 +130,9 @@ fetchLatestBlockHash();
         const voxel = new THREE.Mesh(geometry, material);
 
         voxel.position.set(
-            map(parseInt(hash.substring(i, i + 1), 16), 0, 15, -20, 20),
-            map(parseInt(hash.substring(i + 1, i + 2), 16), 0, 15, -20, 20),
-            map(parseInt(hash.substring(i + 2, i + 3), 16), 0, 15, -20, 20)
+            map(parseInt(hash.substring(i, i + 1), 16), 0, 15, -7.5, 7.5),  // Adjusted mapping range
+            map(parseInt(hash.substring(i + 1, i + 2), 16), 0, 15, -7.5, 7.5),  // Adjusted mapping range
+            map(parseInt(hash.substring(i + 2, i + 3), 16), 0, 15, -7.5, 7.5)   // Adjusted mapping range
         );
 
         // Add each voxel to the group
@@ -132,7 +142,8 @@ fetchLatestBlockHash();
     // Add the group to the scene
     scene.add(group);
 
-    camera.position.z = 60;
+    // Center the camera to the middle of the voxel formation
+    camera.position.set(0, 0, 60);  // Adjusted camera position
 
     function animate() {
         requestAnimationFrame(animate);
@@ -141,6 +152,7 @@ fetchLatestBlockHash();
 
     animate();
 }
+
 
         function map(value, in_min, in_max, out_min, out_max) {
             return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
