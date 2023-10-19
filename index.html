@@ -39,18 +39,18 @@
             font-weight: bold;
         }
         #rendererContainer {
-    width: 100%;
-    height: 70vh;
-    max-height: 80vh;  /* Set a max-height */
-    overflow: hidden;  /* Hide any overflow */
-}
-
-@media (max-width: 640px) {
-    #rendererContainer {
-        width: 90vw;
-        height: auto;
-        max-height: 50vh;  /* Adjust max-height for mobile */
-    }
+        margin-top: 5%;
+        width: 100%;
+        height: 70vh;
+        max-height: 50vh;
+        min-height: 200px;  /* New minimum height */
+        }
+        @media (max-width: 640px) {
+            #rendererContainer {
+                width: 90vw;
+                height: auto;
+                max-height: none;  /* Remove maximum height restriction on mobile */
+            }
         }
     </style>
     <title>HashBlocks by PxPushers</title>
@@ -65,99 +65,84 @@
     <div id="rendererContainer"></div>
     <img src="pxpw.svg" alt="Logo" id="logo">
     <script type="text/javascript">
-         let scene;
+        let scene;
         let camera;
         let renderer;
         let container;
 
-
         function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.aspect = container.offsetWidth / container.offsetHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.offsetWidth, container.offsetHeight);
         }
 
         window.addEventListener('resize', onWindowResize, false);
 
-
         async function fetchLatestBlockHash() {
-    try {
-        const response = await axios.get('https://api.blockchair.com/bitcoin/blocks?limit=1');
-        if (response.data && response.data.data && response.data.data.length > 0) {
-            const latestBlock = response.data.data[0];
-            const latestBlockHash = latestBlock.hash.replace(/^0+/, '');  // Remove leading zeros
-            const blockHeight = latestBlock.id;  // Block height
-            const blockTimestamp = latestBlock.time;  // Block timestamp
-            document.getElementById('blockHashText').innerText = `Latest Block Hash: ${latestBlockHash}`;
-            document.getElementById('blockHeightText').innerText = `Block Height: ${blockHeight}`;
-            document.getElementById('blockTimestampText').innerText = `Block Timestamp: ${blockTimestamp}`;
-            generateVisualization(latestBlockHash);
-        } else {
-            document.getElementById('blockHashText').innerText = 'Failed to fetch latest block data';
-            document.getElementById('blockHeightText').innerText = 'Failed to fetch block height';
-            document.getElementById('blockTimestampText').innerText = 'Failed to fetch block timestamp';
+            try {
+                const response = await axios.get('https://api.blockchair.com/bitcoin/blocks?limit=1');
+                if (response.data && response.data.data && response.data.data.length > 0) {
+                    const latestBlock = response.data.data[0];
+                    const latestBlockHash = latestBlock.hash.replace(/^0+/, '');  // Remove leading zeros
+                    const blockHeight = latestBlock.id;  // Block height
+                    const blockTimestamp = latestBlock.time;  // Block timestamp
+                    document.getElementById('blockHashText').innerText = `Latest Block Hash: ${latestBlockHash}`;
+                    document.getElementById('blockHeightText').innerText = `Block Height: ${blockHeight}`;
+                    document.getElementById('blockTimestampText').innerText = `Block Timestamp: ${blockTimestamp}`;
+                    generateVisualization(latestBlockHash);
+                } else {
+                    document.getElementById('blockHashText').innerText = 'Failed to fetch latest block data';
+                    document.getElementById('blockHeightText').innerText = 'Failed to fetch block height';
+                    document.getElementById('blockTimestampText').innerText = 'Failed to fetch block timestamp';
+                }
+            } catch (error) {
+                document.getElementById('blockHashText').innerText = 'Error fetching latest block hash';
+                document.getElementById('blockHeightText').innerText = 'Error fetching block height';
+                document.getElementById('blockTimestampText').innerText = 'Error fetching block timestamp';
+            }
         }
-    } catch (error) {
-        document.getElementById('blockHashText').innerText = 'Error fetching latest block hash';
-        document.getElementById('blockHeightText').innerText = 'Error fetching block height';
-        document.getElementById('blockTimestampText').innerText = 'Error fetching block timestamp';
-    }
-}
-
-// Call the function to fetch the latest block hash
-fetchLatestBlockHash();
-
-
+        // Call the function to fetch the latest block hash
+        fetchLatestBlockHash();
 
         // Visualization code
         function generateVisualization(hash) {
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    renderer = new THREE.WebGLRenderer();
-    container = document.getElementById('rendererContainer');
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(container.offsetWidth, container.offsetHeight);
-    container.appendChild(renderer.domElement);
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer();
+        container = document.getElementById('rendererContainer');
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(container.offsetWidth, container.offsetHeight);
+        container.appendChild(renderer.domElement);
+        const geometry = new THREE.BoxGeometry(10, 10, 10);
+        // Create a group to hold all the voxels
+        const group = new THREE.Group();
+        for (let i = 0; i < hash.length; i += 3) {
+            const hexColor = `#${hash.substring(i, i + 3)}`;
+            const material = new THREE.MeshBasicMaterial({color: hexColor});
+            const voxel = new THREE.Mesh(geometry, material);
 
-    const geometry = new THREE.BoxGeometry(10, 10, 10);
+            voxel.position.set(
+                map(parseInt(hash.substring(i, i + 1), 16), 0, 15, -7.5, 7.5),  // Adjusted mapping range
+                map(parseInt(hash.substring(i + 1, i + 2), 16), 0, 15, -7.5, 7.5),  // Adjusted mapping range
+                map(parseInt(hash.substring(i + 2, i + 3), 16), 0, 15, -7.5, 7.5)   // Adjusted mapping range
+            );
 
-    // Create a group to hold all the voxels
-    const group = new THREE.Group();
-
-    for (let i = 0; i < hash.length; i += 3) {
-        const hexColor = `#${hash.substring(i, i + 3)}`;
-        const material = new THREE.MeshBasicMaterial({color: hexColor});
-        const voxel = new THREE.Mesh(geometry, material);
-
-        voxel.position.set(
-            map(parseInt(hash.substring(i, i + 1), 16), 0, 15, -7.5, 7.5),  // Adjusted mapping range
-            map(parseInt(hash.substring(i + 1, i + 2), 16), 0, 15, -7.5, 7.5),  // Adjusted mapping range
-            map(parseInt(hash.substring(i + 2, i + 3), 16), 0, 15, -7.5, 7.5)   // Adjusted mapping range
-        );
-
-        // Add each voxel to the group
-        group.add(voxel);
-    }
-
-    // Add the group to the scene
-    scene.add(group);
-
-    // Center the camera to the middle of the voxel formation
-    camera.position.set(0, 0, 60);  // Adjusted camera position
-
-    function animate() {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-    }
-
-    animate();
-}
-
-
+            // Add each voxel to the group
+            group.add(voxel);
+        }
+        // Add the group to the scene
+        scene.add(group);
+        // Center the camera to the middle of the voxel formation
+        camera.position.set(0, 0, 60);  // Adjusted camera position
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+        }
         function map(value, in_min, in_max, out_min, out_max) {
             return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
         }
-
     </script>
 </body>
 </html>
